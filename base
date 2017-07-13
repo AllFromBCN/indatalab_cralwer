@@ -1,0 +1,107 @@
+#Google Play review-crawling
+#Programmed by SooMin, Jeong
+
+import time
+from multiprocessing import Pool
+from time import localtime, strftime
+from selenium import webdriver
+from selenium.common.exceptions import ElementNotVisibleException, NoSuchElementException
+
+#URLs
+#1
+shinhan = "https://play.google.com/store/apps/details?id=com.shcard.smartpay"
+coupang = "https://play.google.com/store/apps/details?id=com.coupang.mobile"
+naverDic = "https://play.google.com/store/apps/details?id=com.nhn.android.naverdic"
+mangoPlate = "https://play.google.com/store/apps/details?id=com.mangoplate"
+piki = "https://play.google.com/store/apps/details?id=sixclk.newpiki"
+#6
+kakaoTalk = "https://play.google.com/store/apps/details?id=com.kakao.talk"
+instagram = "https://play.google.com/store/apps/details?id=com.instagram.android"
+melon = "https://play.google.com/store/apps/details?id=com.iloen.melon"
+oliveYoung = "https://play.google.com/store/apps/details?id=com.oliveyoung"
+ted = "https://play.google.com/store/apps/details?id=com.ted.android"
+#11
+tmoney = "https://play.google.com/store/apps/details?id=com.kt.mtmoney"
+naverCal = "https://play.google.com/store/apps/details?id=com.nhn.android.calendar"
+payco = "https://play.google.com/store/apps/details?id=com.nhnent.payapp"
+pooq = "https://play.google.com/store/apps/details?id=kr.co.captv.pooqV2"
+word = "https://play.google.com/store/apps/details?id=com.microsoft.office.word"
+#16
+baemin = "https://play.google.com/store/apps/details?id=com.sampleapp"
+
+def permitCheck(num):
+    permit = False
+    if (num <= 100):
+        permit = True
+    return permit
+
+def main(site, name):
+    #Creating a text file to write the reviews from Google Play
+    fileName = name + strftime("_%m%d_%Hh%M")
+    output = open(fileName, "w", -1, "utf-8")
+
+    driver = webdriver.Chrome()
+    driver.get(site)
+
+    button = driver.find_element_by_xpath('//*[@id="body-content"]/div/div/div[1]/div[2]/div[2]/div[1]/div[4]/button[2]/div[2]/div/div')
+    button.click()
+
+    i=0
+    ne=po=0
+    while(True):
+        try:
+            print('[page:'+str(i)+']')
+            i=i+1
+            #containing single reviews
+            reviewList = driver.find_elements_by_class_name('single-review')
+
+            for eachReview in reviewList:
+                content = eachReview.find_element_by_class_name('review-body')
+
+                # getting the star rating from current rate
+                currentRate = eachReview.find_element_by_class_name('current-rating')
+                starRate = currentRate.get_attribute('style')[7:9]
+                star = int(int(starRate) / 20)
+                if (star == 0):
+                    star = 5
+
+                outputPermit = False
+
+                if(len(content.text)>2):
+                    if(star ==1 or star ==2):
+                        ne+=1
+                        outputPermit = permitCheck(ne)
+                    elif(star == 5):
+                        po+=1
+                        outputPermit = permitCheck(po)
+
+                    if(outputPermit):
+                        output.write(str(star) +'\t'+content.text+'\n')
+                        print(str(ne)+':'+str(po)+'\t'+str(star) + '\t'+content.text)
+            if(ne>=100 and po>=100):
+                break
+
+            button.click()
+
+        except ElementNotVisibleException:
+            print("Error - Element Not Visible")
+            break
+
+        except NoSuchElementException:
+            print("Error - No such Element")
+            break
+
+    output.close()
+    driver.quit()
+
+start_time = time.time()
+
+siteList = [shinhan, coupang, naverDic, mangoPlate, piki, kakaoTalk, instagram, melon]
+#lists of waiting ---
+#oliveYoung, ted, tmoney, naverCal, payco, pooq, word
+
+process_num=len(siteList)
+pool = Pool(processes=process_num)
+pool.map(main, siteList)
+
+print("--- %s seconds ---", (time.time()-start_time))
