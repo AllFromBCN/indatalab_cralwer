@@ -37,7 +37,7 @@ def permitCheck(num):
 
 def main(site, name):
     #Creating a text file to write the reviews from Google Play
-    fileName = name + strftime("_%m%d_%Hh%M")
+    fileName = name + strftime("_%m%d_%Hh%M")+'.txt'
     output = open(fileName, "w", -1, "utf-8")
 
     driver = webdriver.Chrome()
