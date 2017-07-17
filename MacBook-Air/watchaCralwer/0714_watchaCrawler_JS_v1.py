@@ -26,7 +26,7 @@ def main(site):
 
     #Inserting the id and pw
     wcId = 'soominjeong93@gmail.com'
-    wcPw = 'ab136000'
+    wcPw = 'PASSWORD'
     idin = driver.find_element_by_xpath('//*[@id="user_email"]')
     idin.send_keys(wcId)
     pwin = driver.find_element_by_xpath('//*[@id="user_password"]')
