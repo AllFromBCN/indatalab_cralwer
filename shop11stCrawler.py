@@ -24,7 +24,7 @@ def crawl(driver, output):
     stop4bal = False
 
     for starNum in [1,2,5]:
-        print ("========="+str(starNum)+" stars"+"=========")
+        print ("========="+str(starNum)+" star(s)"+"=========")
 
         # changing the category into 5stars, 2stars, and 1star
         category = driver.find_element_by_xpath('//*[@id="detailViewGrade"]')
@@ -43,7 +43,7 @@ def crawl(driver, output):
             while(True and stop4bal == False):
                 for i in range(0,9):
                     pageNum+=1
-                    print("[ page: ", pageNum, "]")
+                    #print("[ page: ", pageNum, "]")
                     wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'review_list')))
                     reviewList = driver.find_element_by_class_name('review_list')
                     pages = reviewList.find_element_by_class_name('s_paging_v2').find_elements_by_id('paging_page')
@@ -58,10 +58,10 @@ def crawl(driver, output):
                         currentComment = comment_temp.text
                         lenComment = len(comment_temp.text)
 
-                        if ( (negReviews==0 and posReviews==0 and starnum!=5) or negReviews > posReviews):
+                        if ( (negReviews==0 and posReviews==0 and starNum!=5) or negReviews > posReviews):
                             if (oldComment == currentComment):
                                 dupliReviews.append(oldComment)
-                            elif (lenComment>3 and currentComment not in dupliReviews):
+                            elif (lenComment>5 and currentComment not in dupliReviews):
                                 oldComment = currentComment
                                 output.write(str(starNum) + '\t' + str(currentComment) +'\n')
                                 if (starNum == 1 or starNum == 2) : negReviews +=1
@@ -73,6 +73,7 @@ def crawl(driver, output):
                             break
 
                     #click the next list of 10 pages ('>>')
+                    wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'review_list')))
                     nextPage = pages[i].click()
 
                 wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'review_list')))
@@ -87,7 +88,7 @@ def crawl(driver, output):
             print("Error - End of the page")
             continue
 
-        except TimeoutException or TimeoutError:
+        except TimeoutError:
             driver.implicitly_wait(30)
             continue
 
@@ -102,7 +103,7 @@ def access(args):
     name = args[0]
     fileName = name + strftime("_%m%d_%Hh%M")+'.txt'
     print(fileName)
-    output = open(fileName, "a", -1, "utf-8")
+    output = open(fileName, "w", -1, "utf-8")
 
     numReviews = crawl(driver, output)
 
