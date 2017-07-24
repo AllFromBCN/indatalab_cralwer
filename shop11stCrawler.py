@@ -5,6 +5,7 @@
 #   : goes through the reviews with 5, 2, or 1 star automatically (by index error handling)
 #v3 : keep the balance of the numbers between positive reviews and the negative ones
 #v4 : returns the total number of reviews
+#v5 : Multiprocessing
 
 import time
 from time import localtime, strftime
