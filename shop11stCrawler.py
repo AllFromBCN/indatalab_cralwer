@@ -3,9 +3,10 @@
 
 #v2 : removed all the duplicated reviews
 #   : goes through the reviews with 5, 2, or 1 star automatically (by index error handling)
+#v3 : keep the balance of the numbers between positive reviews and the negative ones
+#v4 : returns the total number of reviews
 
 import time
-from multiprocessing import Pool
 from time import localtime, strftime
 from selenium import webdriver
 from selenium.common.exceptions import ElementNotVisibleException, NoSuchElementException
@@ -17,8 +18,12 @@ from selenium.webdriver.support import expected_conditions as EC
 def crawl(driver, output):
 
     wait = WebDriverWait(driver, 5)
+    negReviews = 0
+    posReviews = 0
+    #When the balance between the negative reviews and the positive is broken
+    stop4bal = False
 
-    for starNum in [5,2,1]:
+    for starNum in [1,2,5]:
         print ("========="+str(starNum)+" stars"+"=========")
 
         # changing the category into 5stars, 2stars, and 1star
@@ -35,7 +40,7 @@ def crawl(driver, output):
         pageNum=0
 
         try:
-            while(True):
+            while(True and stop4bal == False):
                 for i in range(0,9):
                     pageNum+=1
                     print("[ page: ", pageNum, "]")
@@ -53,12 +58,19 @@ def crawl(driver, output):
                         currentComment = comment_temp.text
                         lenComment = len(comment_temp.text)
 
-                        if (oldComment == currentComment):
-                            dupliReviews.append(oldComment)
-                        elif (lenComment>3 and currentComment not in dupliReviews):
-                            oldComment = currentComment
-                            output.write(str(starNum) + '\t' + str(currentComment))
-                            # print(str(starNum) + '\t' + str(currentComment))
+                        if ( (negReviews==0 and posReviews==0 and starnum!=5) or negReviews > posReviews):
+                            if (oldComment == currentComment):
+                                dupliReviews.append(oldComment)
+                            elif (lenComment>3 and currentComment not in dupliReviews):
+                                oldComment = currentComment
+                                output.write(str(starNum) + '\t' + str(currentComment) +'\n')
+                                if (starNum == 1 or starNum == 2) : negReviews +=1
+                                elif (starNum == 5): posReviews+=1
+                                # print(str(starNum) + '\t' + str(currentComment))
+
+                        else:
+                            stop4bal = True
+                            break
 
                     #click the next list of 10 pages ('>>')
                     nextPage = pages[i].click()
@@ -75,24 +87,27 @@ def crawl(driver, output):
             print("Error - End of the page")
             continue
 
-        except TimeoutError:
+        except TimeoutException or TimeoutError:
             driver.implicitly_wait(30)
             continue
 
-def main(args):
+    print ("negative : %d, positive : %d" %(negReviews, posReviews))
+    return posReviews + negReviews
+
+def access(args):
     driver = webdriver.Chrome()
-    driver.get(args[0])
+    driver.get(args[1])
     driver.switch_to.frame('ifrmReview')
 
-    name = args[1]
+    name = args[0]
     fileName = name + strftime("_%m%d_%Hh%M")+'.txt'
+    print(fileName)
     output = open(fileName, "a", -1, "utf-8")
 
-    crawl(driver, output)
+    numReviews = crawl(driver, output)
 
     driver.quit()
     output.close()
 
-args[0] = "http://deal.11st.co.kr/product/SellerProductDetail.tmall?method=getSellerProductDetail&prdNo=961905132&trTypeCd=37#"
+    return numReviews
 
-main ("http://deal.11st.co.kr/product/SellerProductDetail.tmall?method=getSellerProductDetail&prdNo=961905132&trTypeCd=37#")
