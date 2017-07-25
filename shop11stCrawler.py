@@ -1,5 +1,5 @@
 #11stCrawler
-#designed by Soo Min, JEONG (soo@in-datalab.com)
+#designed by (soo@in-datalab.com)
 
 #v2 : removed all the duplicated reviews
 #   : goes through the reviews with 5, 2, or 1 star automatically (by index error handling)
