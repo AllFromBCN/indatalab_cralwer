@@ -1,5 +1,5 @@
 #11stCrawler
-#Designed by Soo Min, JEONG
+#designed by Soo Min, JEONG
 
 #v2 : removed all the duplicated reviews
 #   : goes through the reviews with 5, 2, or 1 star automatically (by index error handling)
