@@ -37,10 +37,12 @@ def main(site):
     posterList = driver.find_elements_by_class_name("movie-card")
     for poster in posterList:
         poster.find_element_by_class_name('detail-opener').click()
-        active = driver.switch_to_active_element()
-        print(active)
-        print(driver.current_url)
+        print("1")
+        #driver.refresh()
+        print("2")
+        ActionChains(driver).key_down(Keys.CONTROL).send_keys('u').key_up(Keys.CONTROL).perform()
         print("So far...")
+        break;
     #driver.refresh()
     '''
     driver.implicitly_wait(3)
