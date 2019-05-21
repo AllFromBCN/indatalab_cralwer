@@ -100,8 +100,7 @@ siteList = [shinhan, coupang, naverDic, mangoPlate, piki, kakaoTalk, instagram, 
 #lists of waiting ---
 #oliveYoung, ted, tmoney, naverCal, payco, pooq, word
 
-process_num=len(siteList)
-pool = Pool(processes=process_num)
-pool.map(main, siteList)
+for i in range(0:len(siteList)):
+    main(siteList, str(i))
 
 print("--- %s seconds ---", (time.time()-start_time))
